@@ -68,12 +68,54 @@ def custom_openapi():
     except Exception:
         pass # Fallback safe if structure changes
 
+    # Locate the schema block that generates array elements for merging
+    try:
+        schemas = openapi_schema.get("components", {}).get("schemas", {})
+        target_schema = schemas.get("Body_convert_images_to_pdf_api_v1_pdf_from_images_post")
+        
+        if target_schema and "files" in target_schema["properties"]:
+            files_items = target_schema["properties"]["files"]["items"]
+            
+            # Revert from OpenAPI 3.1 style back to traditional Swagger layout
+            files_items["type"] = "string"
+            files_items["format"] = "binary"
+            
+            # Clean up contentMediaType so Swagger doesn't get confused
+            if "contentMediaType" in files_items:
+                del files_items["contentMediaType"]
+    except Exception:
+        pass # Fallback safe if structure changes
+
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
 app.openapi = custom_openapi
 
+from app.core.config import settings
 
+
+def create_storage_directories() -> None:
+    settings.storage_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    settings.upload_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    settings.output_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    settings.temp_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+create_storage_directories()
 
 app.add_middleware(
     CORSMiddleware,

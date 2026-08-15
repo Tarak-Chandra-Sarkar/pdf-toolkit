@@ -2,6 +2,7 @@ import logging
 import uuid
 
 from pathlib import Path
+from typing import List
 
 import pymupdf
 
@@ -16,6 +17,11 @@ from pypdf import PdfReader, PdfWriter
 from io import BytesIO
 from zipfile import ZIP_DEFLATED, ZipFile
 
+import tempfile
+
+from PIL import Image, UnidentifiedImageError
+from fastapi import UploadFile
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,12 +29,16 @@ class PdfService:
 
     def __init__(self) -> None:
         self.base_directory = Path(
-            settings.upload_directory
+            settings.upload_dir
         )
 
-        self.base_directory.mkdir(
-            parents=True,
-            exist_ok=True,
+        # self.base_directory.mkdir(
+        #     parents=True,
+        #     exist_ok=True,
+        # )
+
+        self.outputs_directory = Path(
+            settings.output_dir
         )
 
     def create_file_id(self) -> str:
@@ -60,6 +70,7 @@ class PdfService:
             / "document.pdf"
         )
 
+    
     def validate_pdf(
         self,
         file_path: Path,
@@ -421,5 +432,126 @@ class PdfService:
             output_filename,
             extracted_page_count,
         )
+
+    async def images_to_pdf(
+        self,
+        files: list[tuple[str, bytes]],
+    ) -> Path:
+        """
+        Convert multiple uploaded JPG/JPEG/PNG images
+        into a single PDF.
+
+        The order of the files is preserved.
+        """
+
+        if not files:
+            raise ValueError(
+                "At least one image file is required."
+            )
+
+        images: list[Image.Image] = []
+
+        try:
+            for file in files:
+
+                if not file.filename:
+                    raise ValueError(
+                        "One of the uploaded files has no filename."
+                    )
+
+                filename = file.filename.lower()
+
+                if not filename.endswith(
+                    (".jpg", ".jpeg", ".png")
+                ):
+                    raise ValueError(
+                        f"Unsupported image format: {file.filename}. "
+                        "Only JPG, JPEG and PNG files are supported."
+                    )
+
+                content = await file.read()
+
+                if not content:
+                    raise ValueError(
+                        f"Image file is empty: {file.filename}"
+                    )
+
+                try:
+                    image = Image.open(
+                        BytesIO(content)
+                    )
+
+                    # Force Pillow to fully load the image
+                    image.load()
+
+                except (
+                    UnidentifiedImageError,
+                    OSError,
+                ) as exc:
+
+                    raise ValueError(
+                        f"Unable to read image file: {file.filename}"
+                    ) from exc
+
+                # PDF requires RGB/RGBA-compatible image handling.
+                # Convert everything to RGB for consistent output.
+                if image.mode != "RGB":
+                    image = image.convert("RGB")
+
+                else:
+                    # Make an independent copy so the
+                    # underlying BytesIO can be released.
+                    image = image.copy()
+
+                images.append(image)
+
+            if not images:
+                raise ValueError(
+                    "No valid images were provided."
+                )
+
+            # # Create temporary output PDF.
+            # output_file = tempfile.NamedTemporaryFile(
+            #     suffix=".pdf",
+            #     prefix="images_to_pdf_",
+            #     delete=False,
+            # )
+
+            # Create temporary output PDF.
+            output_path = (
+                settings.output_dir /
+                f"images_to_pdf_{uuid.uuid4().hex}.pdf"
+            )
+
+            # output_path = Path(
+            #     output_file.name
+            # )
+
+            # output_file.close()
+
+
+            first_image = images[0]
+
+            remaining_images = images[1:]
+
+            first_image.save(
+                output_path,
+                format="PDF",
+                save_all=True,
+                append_images=remaining_images,
+                resolution=100.0,
+            )
+
+            return output_path
+
+        finally:
+
+            for image in images:
+
+                try:
+                    image.close()
+
+                except Exception:
+                    pass
 
 pdf_service = PdfService()

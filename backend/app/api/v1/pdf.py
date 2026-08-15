@@ -5,8 +5,8 @@ from fastapi import (
     APIRouter,
     File,
     Form,
-    HTTPException,
     UploadFile,
+    HTTPException,
 )
 
 from app.core.config import settings
@@ -384,7 +384,6 @@ async def preview_pdf_page(
             detail="Unable to render PDF page.",
         ) from exc
 
-
 @router.get(
     "/{file_id}/download",
 )
@@ -434,3 +433,46 @@ async def delete_pdf(
         "status": "deleted",
         "file_id": file_id,
     }
+
+@router.post(
+    "/from-images",
+    summary="Convert Images To PDF",
+)
+async def convert_images_to_pdf(
+    files: List[UploadFile] = File(...),
+):
+    """
+    Convert multiple JPG/JPEG/PNG images into
+    a single PDF.
+
+    Image order is preserved.
+    """
+
+    try:
+
+        output_path = (
+            await pdf_service.images_to_pdf(
+                files
+            )
+        )
+
+    except ValueError as exc:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        ) from exc
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to create PDF from images.",
+        ) from exc
+
+
+    return FileResponse(
+        path=output_path,
+        media_type="application/pdf",
+        filename="images_to_pdf.pdf",
+    )

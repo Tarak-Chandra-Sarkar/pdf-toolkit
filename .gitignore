@@ -39,3 +39,6 @@ htmlcov/
 
 # Docker
 *.pid
+
+# storage for pdf operations
+backend/storage/

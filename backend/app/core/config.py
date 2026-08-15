@@ -3,6 +3,10 @@ from functools import lru_cache
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 class Settings(BaseSettings):
     app_name: str = Field(default="PDF Toolkit")
@@ -13,7 +17,7 @@ class Settings(BaseSettings):
     api_prefix: str = Field(default="/api/v1")
 
     host: str = Field(default="0.0.0.0")
-    port: int = Field(default=8000)
+    port: int = Field(default=8008)
 
     frontend_url: str = Field(default="http://localhost:3000")
 
@@ -26,7 +30,11 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    upload_directory: str = "/tmp/pdf-toolkit"
+    storage_dir: Path = BASE_DIR / "storage"
+
+    upload_dir: Path = storage_dir / "uploads"
+    output_dir: Path = storage_dir / "outputs"
+    temp_dir: Path = storage_dir / "temp"
 
     max_upload_size_mb: int = 50
 
