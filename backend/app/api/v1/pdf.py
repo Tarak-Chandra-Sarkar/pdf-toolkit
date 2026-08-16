@@ -12,6 +12,11 @@ from fastapi import (
 from app.core.config import settings
 from app.models.pdf import PdfInfoResponse
 from app.services.pdf_service import pdf_service
+from app.services.page_management_service import (
+    delete_pages,
+    reorder_pages,
+    rotate_pages,
+)
 
 from fastapi.responses import (
     FileResponse,
@@ -476,3 +481,304 @@ async def convert_images_to_pdf(
         media_type="application/pdf",
         filename="images_to_pdf.pdf",
     )
+
+@router.post(
+    "/pages/delete",
+)
+async def delete_pdf_pages(
+    file: UploadFile = File(...),
+    pages: str = Form(...),
+):
+
+    input_path = (
+        settings.temp_dir
+        / f"page_delete_{file.filename}"
+    )
+
+    try:
+
+        contents = await file.read()
+
+        input_path.write_bytes(
+            contents
+        )
+
+        try:
+            page_numbers = [
+                int(value.strip())
+                for value in pages.split(",")
+                if value.strip()
+            ]
+
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Pages must be a comma-separated "
+                    "list of integers."
+                ),
+            ) from exc
+
+        output_path = delete_pages(
+            input_path=input_path,
+            output_dir=settings.output_dir,
+            pages=page_numbers,
+        )
+
+        return FileResponse(
+            path=output_path,
+            media_type="application/pdf",
+            filename="modified.pdf",
+        )
+
+    except ValueError as exc:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        ) from exc
+
+    except HTTPException:
+        raise
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Unable to delete PDF pages."
+            ),
+        ) from exc
+
+    finally:
+
+        input_path.unlink(
+            missing_ok=True
+        )
+
+@router.post(
+    "/pages/delete",
+)
+async def delete_pdf_pages(
+    file: UploadFile = File(...),
+    pages: str = Form(...),
+):
+
+    input_path = (
+        settings.temp_dir
+        / f"page_delete_{file.filename}"
+    )
+
+    try:
+
+        contents = await file.read()
+
+        input_path.write_bytes(
+            contents
+        )
+
+        try:
+            page_numbers = [
+                int(value.strip())
+                for value in pages.split(",")
+                if value.strip()
+            ]
+
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Pages must be a comma-separated "
+                    "list of integers."
+                ),
+            ) from exc
+
+        output_path = delete_pages(
+            input_path=input_path,
+            output_dir=settings.output_dir,
+            pages=page_numbers,
+        )
+
+        return FileResponse(
+            path=output_path,
+            media_type="application/pdf",
+            filename="modified.pdf",
+        )
+
+    except ValueError as exc:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        ) from exc
+
+    except HTTPException:
+        raise
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Unable to delete PDF pages."
+            ),
+        ) from exc
+
+    finally:
+
+        input_path.unlink(
+            missing_ok=True
+        )
+
+@router.post(
+    "/pages/reorder",
+)
+async def reorder_pdf_pages(
+    file: UploadFile = File(...),
+    order: str = Form(...),
+):
+
+    input_path = (
+        settings.temp_dir
+        / f"page_reorder_{file.filename}"
+    )
+
+    try:
+
+        contents = await file.read()
+
+        input_path.write_bytes(
+            contents
+        )
+
+        try:
+            page_order = [
+                int(value.strip())
+                for value in order.split(",")
+                if value.strip()
+            ]
+
+        except ValueError as exc:
+
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Order must be a comma-separated "
+                    "list of integers."
+                ),
+            ) from exc
+
+        output_path = reorder_pages(
+            input_path=input_path,
+            output_dir=settings.output_dir,
+            order=page_order,
+        )
+
+        return FileResponse(
+            path=output_path,
+            media_type="application/pdf",
+            filename="reordered.pdf",
+        )
+
+    except ValueError as exc:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        ) from exc
+
+    except HTTPException:
+        raise
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Unable to reorder PDF pages."
+            ),
+        ) from exc
+
+    finally:
+
+        input_path.unlink(
+            missing_ok=True
+        )
+
+@router.post(
+    "/pages/rotate",
+)
+async def rotate_pdf_pages(
+    file: UploadFile = File(...),
+    pages: str = Form(...),
+    rotation: int = Form(...),
+):
+
+    input_path = (
+        settings.temp_dir
+        / f"page_rotate_{file.filename}"
+    )
+
+    try:
+
+        contents = await file.read()
+
+        input_path.write_bytes(
+            contents
+        )
+
+        try:
+
+            page_numbers = [
+                int(value.strip())
+                for value in pages.split(",")
+                if value.strip()
+            ]
+
+        except ValueError as exc:
+
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Pages must be a comma-separated "
+                    "list of integers."
+                ),
+            ) from exc
+
+        output_path = rotate_pages(
+            input_path=input_path,
+            output_dir=settings.output_dir,
+            pages=page_numbers,
+            rotation=rotation,
+        )
+
+        return FileResponse(
+            path=output_path,
+            media_type="application/pdf",
+            filename="rotated.pdf",
+        )
+
+    except ValueError as exc:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        ) from exc
+
+    except HTTPException:
+        raise
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Unable to rotate PDF pages."
+            ),
+        ) from exc
+
+    finally:
+
+        input_path.unlink(
+            missing_ok=True
+        )
