@@ -4,12 +4,14 @@ import { AppHeader } from "./components/AppHeader";
 import { HomePage } from "./pages/HomePage";
 import { MergePage } from "./pages/MergePage";
 import { SplitPage } from "./pages/SplitPage";
+import { ImagesToPdfPage } from "./pages/ImagesToPdfPage";
 
 
 type Page =
   | "home"
   | "merge"
-  | "split";
+  | "split"
+  | "images-to-pdf";
 
 
 function App() {
@@ -34,6 +36,10 @@ function App() {
 
         onSplit={() =>
           setPage("split")
+        }
+
+        onImagesToPdf={() =>
+          setPage("images-to-pdf")
         }
       />
 
@@ -60,6 +66,10 @@ function App() {
 
         {page === "split" && (
           <SplitPage />
+        )}
+
+        {page === "images-to-pdf" && (
+          <ImagesToPdfPage />
         )}
 
       </main>

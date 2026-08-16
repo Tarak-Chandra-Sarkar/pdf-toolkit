@@ -46,7 +46,6 @@ async function request<T>(
   return response.json() as Promise<T>;
 }
 
-
 export async function getHealth()
   : Promise<HealthResponse> {
 
@@ -54,7 +53,6 @@ export async function getHealth()
     "/api/v1/health",
   );
 }
-
 
 export async function uploadPdf(
   file: File,
@@ -76,7 +74,6 @@ export async function uploadPdf(
     },
   );
 }
-
 
 export async function mergePdfs(
   files: File[],
@@ -102,7 +99,6 @@ export async function mergePdfs(
   );
 }
 
-
 export function getPdfDownloadUrl(
   fileId: string,
 ): string {
@@ -125,7 +121,6 @@ export function getPdfPreviewUrl(
   );
 }
 
-
 export async function deletePdf(
   fileId: string,
 ): Promise<void> {
@@ -136,4 +131,46 @@ export async function deletePdf(
       method: "DELETE",
     },
   );
+}
+
+export async function convertImagesToPdf(
+  files: File[],
+): Promise<Blob> {
+
+  const formData = new FormData();
+
+  for (const file of files) {
+    formData.append("files", file);
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/pdf/from-images`,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+
+  if (!response.ok) {
+
+    let message =
+      "Unable to convert images to PDF.";
+
+    try {
+
+      const data =
+        await response.json();
+
+      if (data?.detail) {
+        message = data.detail;
+      }
+
+    } catch {
+      // Ignore JSON parsing errors.
+    }
+
+    throw new Error(message);
+  }
+
+  return response.blob();
 }
