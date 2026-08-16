@@ -26,6 +26,8 @@ function App() {
     <div className="min-h-screen bg-slate-50">
 
       <AppHeader
+        activePage={page}
+
         onHome={() =>
           setPage("home")
         }

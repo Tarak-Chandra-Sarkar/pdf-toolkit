@@ -1,4 +1,13 @@
+type Page =
+  | "home"
+  | "merge"
+  | "split"
+  | "images-to-pdf";
+
+
 interface AppHeaderProps {
+  activePage: Page;
+
   onHome: () => void;
   onMerge: () => void;
   onSplit: () => void;
@@ -7,24 +16,60 @@ interface AppHeaderProps {
 
 
 export function AppHeader({
+  activePage,
   onHome,
   onMerge,
   onSplit,
   onImagesToPdf,
 }: AppHeaderProps) {
 
+
+  const navItemClass = (
+    page: Page,
+  ) => {
+
+    const isActive =
+      activePage === page;
+
+
+    return [
+      "rounded-lg",
+      "px-4",
+      "py-2.5",
+      "text-sm",
+      "font-medium",
+      "transition-colors",
+      "duration-150",
+
+      isActive
+        ? [
+            "bg-slate-900",
+            "text-white",
+            "shadow-sm",
+          ].join(" ")
+        : [
+            "text-slate-600",
+            "hover:bg-slate-100",
+            "hover:text-slate-900",
+          ].join(" "),
+    ].join(" ");
+  };
+
+
   return (
     <header className="border-b border-slate-200 bg-white">
 
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
+
+        {/* Brand */}
 
         <button
           type="button"
           onClick={onHome}
-          className="text-left"
+          className="shrink-0 text-left"
         >
 
-          <h1 className="text-xl font-bold text-slate-900">
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">
             PDF Toolkit
           </h1>
 
@@ -35,12 +80,24 @@ export function AppHeader({
         </button>
 
 
-        <nav className="flex items-center gap-2">
+        {/* Navigation */}
+
+        <nav
+          className="
+            flex
+            items-center
+            gap-1
+            overflow-x-auto
+            rounded-xl
+            bg-slate-50
+            p-1
+          "
+        >
 
           <button
             type="button"
             onClick={onHome}
-            className="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100"
+            className={navItemClass("home")}
           >
             Home
           </button>
@@ -49,7 +106,7 @@ export function AppHeader({
           <button
             type="button"
             onClick={onMerge}
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
+            className={navItemClass("merge")}
           >
             Merge PDF
           </button>
@@ -58,24 +115,45 @@ export function AppHeader({
           <button
             type="button"
             onClick={onSplit}
-            className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            className={navItemClass("split")}
           >
             Split PDF
           </button>
 
+
           <button
             type="button"
             onClick={onImagesToPdf}
-            className="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100"
+            className={navItemClass(
+              "images-to-pdf",
+            )}
           >
             Images → PDF
           </button>
 
-          <div className="ml-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-            MVP v1.0
-          </div>
-
         </nav>
+
+
+        {/* Version */}
+
+        <div
+          className="
+            hidden
+            shrink-0
+            rounded-full
+            border
+            border-slate-200
+            bg-white
+            px-3
+            py-1.5
+            text-xs
+            font-medium
+            text-slate-500
+            sm:block
+          "
+        >
+          MVP v1.0
+        </div>
 
       </div>
 
