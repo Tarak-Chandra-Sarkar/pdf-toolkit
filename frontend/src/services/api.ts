@@ -5,9 +5,123 @@ import type {
 
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ??
-  "http://localhost:8000";
+  import.meta.env.VITE_API_BASE_URL ||
+  "http://localhost:8008";
 
+
+async function getApiError(
+  response: Response,
+): Promise<string> {
+
+  try {
+    const data = await response.json();
+
+    if (data?.detail) {
+      return String(data.detail);
+    }
+  } catch {
+    // Ignore JSON parsing errors.
+  }
+
+  return `Request failed with status ${response.status}.`;
+}
+
+async function postPdfOperation(
+  endpoint: string,
+  formData: FormData,
+): Promise<Blob> {
+
+  const response = await fetch(
+    `${API_BASE_URL}${endpoint}`,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await getApiError(response),
+    );
+  }
+
+  return response.blob();
+}
+
+export async function deletePdfPages(
+  file: File,
+  pages: number[],
+): Promise<Blob> {
+
+  const formData = new FormData();
+
+  formData.append(
+    "file",
+    file,
+  );
+
+  formData.append(
+    "pages",
+    pages.join(","),
+  );
+
+  return postPdfOperation(
+    "/api/v1/pdf/pages/delete",
+    formData,
+  );
+}
+
+export async function reorderPdfPages(
+  file: File,
+  order: number[],
+): Promise<Blob> {
+
+  const formData = new FormData();
+
+  formData.append(
+    "file",
+    file,
+  );
+
+  formData.append(
+    "order",
+    order.join(","),
+  );
+
+  return postPdfOperation(
+    "/api/v1/pdf/pages/reorder",
+    formData,
+  );
+}
+
+export async function rotatePdfPages(
+  file: File,
+  pages: number[],
+  rotation: 90 | 180 | 270,
+): Promise<Blob> {
+
+  const formData = new FormData();
+
+  formData.append(
+    "file",
+    file,
+  );
+
+  formData.append(
+    "pages",
+    pages.join(","),
+  );
+
+  formData.append(
+    "rotation",
+    String(rotation),
+  );
+
+  return postPdfOperation(
+    "/api/v1/pdf/pages/rotate",
+    formData,
+  );
+}
 
 async function request<T>(
   path: string,

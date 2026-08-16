@@ -5,13 +5,15 @@ import { HomePage } from "./pages/HomePage";
 import { MergePage } from "./pages/MergePage";
 import { SplitPage } from "./pages/SplitPage";
 import { ImagesToPdfPage } from "./pages/ImagesToPdfPage";
+import { PageManagementPage } from "./pages/PageManagementPage";
 
 
 type Page =
   | "home"
   | "merge"
   | "split"
-  | "images-to-pdf";
+  | "images-to-pdf"
+  | "page-management";
 
 
 function App() {
@@ -43,6 +45,10 @@ function App() {
         onImagesToPdf={() =>
           setPage("images-to-pdf")
         }
+
+        onPageManagement={() =>
+          setPage("page-management")
+        }
       />
 
 
@@ -72,6 +78,10 @@ function App() {
 
         {page === "images-to-pdf" && (
           <ImagesToPdfPage />
+        )}
+
+        {page === "page-management" && (
+          <PageManagementPage />
         )}
 
       </main>
