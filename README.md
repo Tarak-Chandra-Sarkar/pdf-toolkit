@@ -232,19 +232,30 @@ pdf-toolkit/
 | PDF encryption         | ⏳      |
 | Watermark              | ⏳      |
 
+
+---
+## Screenshots
+![alt text](docs/screenshots/img1.png)![alt text](docs/screenshots/img2.png)
+![alt text](docs/screenshots/img3.png)
+---
+
+## Author
+
+👤 **Tarak Chandra Sarkar**
+
+* Github: [@tarak-chandra-sarkar](https://github.com/Tarak-Chandra-Sarkar)
+* LinkedIn: [@tarak-chandra-sarkar](https://www.linkedin.com/in/tarak-chandra-sarkar/)
+
+## 🤝 Contributing
+
+N/A
 ---
 
  ## 📄 License
 
- See the `LICENSE` file for the license applicable to this project.
+Copyright &copy; 2026 [Tarak Chandra Sarkar](https://github.com/Tarak-Chandra-Sarkar/pdf-toolkit).
 
----
-
- ## 👤 Author
-
- **Tarak Chandra Sarkar**
-
- GitHub:
+This project is [MIT](/LICENSE) licensed.
 
 ---
 
